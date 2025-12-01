@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>حاسبة السعرات الاحترافية</title>
+
+<!-- ===== STYLE ===== -->
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #1f1c2c, #928dab);
+        font-family: "Tahoma", sans-serif;
+        color: white;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 40px auto;
+        background: rgba(0, 0, 0, 0.45);
+        padding: 30px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+
+    p {
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: none;
+        margin-top: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input:focus {
+        box-shadow: 0 0 10px #00e1ff;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 15px;
+        background: #00e1ff;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 12px;
+        color: #000;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00b5c7;
+    }
+
+    .result {
+        margin-top: 25px;
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 15px;
+        line-height: 1.9;
+        box-shadow: inset 0 0 12px rgba(255,255,255,0.2);
+    }
+
+    .macro {
+        display: flex;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.15);
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>حاسبة السعرات الاحترافية</h2>
+    <p>اكتب: <b>150g دجاج + 1 موزة + 100g رز</b></p>
+
+    <input id="foodInput" type="text" placeholder="أدخل المكونات هنا...">
+    <button onclick="calculate()">احسب السعرات</button>
+
+    <div id="result" class="result"></div>
+</div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+
+// database: calories + protein + carbs + fats
+const db = {
+    "دجاج": {cal:165, p:31, c:0, f:3.6},
+    "رز": {cal:130, p:2.7, c:28, f:0.3},
+    "شوفان": {cal:389, p:17, c:66, f:7},
+    "موز": {cal:89, p:1.1, c:23, f:0.3},
+    "بيض": {cal:155, p:13, c:1.1, f:11},
+    "تفاح": {cal:52, p:0.3, c:14, f:0.2},
+    "طماطم": {cal:18, p:0.9, c:3.9, f:0.2},
+    "بطاطا": {cal:77, p:2, c:17, f:0.1},
+    "سمك": {cal:206, p:22, c:0, f:12},
+    "لوز": {cal:579, p:21, c:22, f:50}
+};
+
+function calculate() {
+    let input = document.getElementById("foodInput").value;
+    let items = input.split("+");
+
+    let totalCal=0, totalP=0, totalC=0, totalF=0;
+    let details="";
+
+    items.forEach(item => {
+        item = item.trim();
+        let grams = item.match(/(\d+)\s*g\s*(\S+)/);
+        let piece = item.match(/(\d+)\s+(\S+)/);
+
+        if (grams) {
+            let g = parseInt(grams[1]);
+            let food = grams[2];
+            if (db[food]) {
+                let cal = (g/100)*db[food].cal;
+                let p = (g/100)*db[food].p;
+                let c = (g/100)*db[food].c;
+                let f = (g/100)*db[food].f;
+
+                totalCal+=cal; totalP+=p; totalC+=c; totalF+=f;
+
+                details += `${g}g ${food}: <b>${cal.toFixed(1)}</b> كالوري<br>`;
+            }
+        }
+
+        else if (piece) {
+            let qty = parseInt(piece[1]);
+            let food = piece[2];
+            if (db[food]) {
+                let cal = qty * db[food].cal;
+                let p = qty * db[food].p;
+                let c = qty * db[food].c;
+                let f = qty * db[food].f;
+
+                totalCal+=cal; totalP+=p; totalC+=c; totalF+=f;
+
+                details += `${qty} × ${food}: <b>${cal.toFixed(1)}</b> كالوري<br>`;
+            }
+        }
+
+    });
+
+    document.getElementById("result").innerHTML = `
+        <h3>تفاصيل الحساب:</h3>
+        ${details}
+        <hr>
+        <div class="macro"><span>📌 مجموع السعرات</span><b>${totalCal.toFixed(1)} kcal</b></div>
+        <div class="macro"><span>🍗 بروتين</span><b>${totalP.toFixed(1)} g</b></div>
+        <div class="macro"><span>🍞 كاربوهيدرات</span><b>${totalC.toFixed(1)} g</b></div>
+        <div class="macro"><span>🥑 دهون</span><b>${totalF.toFixed(1)} g</b></div>
+    `;
+}
+
+</script>
+
+</body>
+</html>
